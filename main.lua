@@ -1,5 +1,5 @@
 -- Gauthier G.
--- v0.1
+-- v1.0
 -- CrossPatchByGroup
 -- Shortcut
 local cmd = gma.cmd
