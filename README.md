@@ -13,5 +13,3 @@ Dans le cas ou les machines dans les groupes A et B ne sont pas les mêmes (pour
 Dans le cas ou le but est de refaire l'ordre du patch, il faut faire un groupe avec l'ordre finale voulu (par exemple Fixture ID 101 Thru 108), il sera le groupe A. Puis un deuxième groupe avec l'ordre actuel réel des machines qui sera le groupe B et enfin lancer le plugin.
 
 Lors de la demande de confirmation de crosspatch, une grande vue sur la command line est recommandée pour voir l'aperçu des changements que va effectuer le crosspatch.
-
-![](https://i.ibb.co/TY1XDnS/apercu-du-crosspatch.jpg)
