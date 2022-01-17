@@ -1,6 +1,6 @@
 # crossPatchByGroup-GMA2
 Inverser le patch de 2 groupes dans GrandMA2
-v1.0
+v1.1
 
 ## Utilisation :
 CrossPatchByGroup permet d'inverser le patch de 2 groupes.

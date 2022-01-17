@@ -1,5 +1,5 @@
 -- Gauthier G.
--- v1.0
+-- v1.1
 -- CrossPatchByGroup
 -- variable
 local tempGroup = 9999 -- id du groupe temporaire, attention il va etre modifie sans confirmation
