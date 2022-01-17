@@ -1,6 +1,9 @@
 -- Gauthier G.
 -- v1.0
 -- CrossPatchByGroup
+-- variable
+local tempGroup = 9999 -- id du groupe temporaire, attention il va etre modifie sans confirmation
+
 -- Shortcut
 local cmd = gma.cmd
 local setvar = gma.show.setvar
@@ -113,83 +116,112 @@ local function patchFixture(fixtureID, DmxAdress)
 end
 
 local function start(argCmd)
-    local groupAIndex = textinput("Group A", "0")
-    local groupBIndex = textinput("Group B", "0")
+    if tonumber(getvar("selectedfixturescount")) == 0 then
+        blindEdit(true)
+        local groupAIndex = textinput("Group A", "0")
+        local groupBIndex = textinput("Group B", "0")
 
-    local groupAFixtures = findFixtureInGroup(groupAIndex)
-    local groupBFixtures = findFixtureInGroup(groupBIndex)
+        local groupAFixtures = findFixtureInGroup(groupAIndex)
+        local groupBFixtures = findFixtureInGroup(groupBIndex)
 
-    if length(groupAFixtures) ~= length(groupBFixtures) then -- Test si les 2 groupes font la meme longueur, sinon erreur
-        error("Le groupe A et B ne comporte pas le meme nombre de fixture, cross patch impossible !")
-        return false
-    end
-
-    local groupAPatch = {} -- creation du talbeau patch groupe A
-    for key, value in pairs(groupAFixtures) do
-        groupAPatch[length(groupAPatch) + 1] = getPatchOfFixture(value)
-    end
-
-    local groupBPatch = {} -- creation du talbeau patch groupe B
-    for key, value in pairs(groupBFixtures) do
-        groupBPatch[length(groupBPatch) + 1] = getPatchOfFixture(value)
-    end
-
-    -- Affichage d'un recap global du swap
-    gma.feedback("--------------------------------------------------------------------------------------")
-    for key, value in pairs(groupAFixtures) do
-        if inList(groupBFixtures, value) then
-            gma.feedback("Fixture ID " .. value .. " patch " .. groupAPatch[key] ..
-                             " <------- TAKE PATCH OF -------< Fixture ID " .. groupBFixtures[key] .. " patch " ..
-                             groupBPatch[key])
-        else
-            gma.feedback("Fixture ID " .. value .. " patch " .. groupAPatch[key] ..
-                             " <------- SWAP PATCH -------> Fixture ID " .. groupBFixtures[key] .. " patch " ..
-                             groupBPatch[key])
+        if length(groupAFixtures) ~= length(groupBFixtures) then -- Test si les 2 groupes font la meme longueur, sinon erreur
+            error("Le groupe A et B ne comporte pas le meme nombre de fixture, cross patch impossible !")
+            return false
         end
-    end
-    gma.feedback("--------------------------------------------------------------------------------------")
 
-    if confirm("CrossPatchByGroup",
-        "Confirmez le cross patch entre le groupe " .. groupAIndex .. " et le groupe " .. groupBIndex .. " ?") then -- demande confirmation
-        local patchedList = {} -- Liste des deja patchee
-
-        local progressBar = progress.start("Patch group A") -- Affichage progress bar pour faire joli
-        progress.setrange(progressBar, 0, length(groupAFixtures))
-        local progressBarIndex = 0
-
-        for key, value in pairs(groupAFixtures) do -- Patch du groupe A
-            patchFixture(value, groupBPatch[key])
-            patchedList[length(patchedList) + 1] = value -- Ajout de la fixture a la liste des deja patchee
-
-            progressBarIndex = progressBarIndex + 1
-            progress.set(progressBar, progressBarIndex)
-            progress.settext(progressBar, "Fixture " .. value)
-            sleep()
+        local groupAPatch = {} -- creation du talbeau patch groupe A
+        for key, value in pairs(groupAFixtures) do
+            groupAPatch[length(groupAPatch) + 1] = getPatchOfFixture(value)
         end
-        progress.stop(progressBar)
 
-        progressBar = progress.start("Patch group A") -- Affichage progress bar pour faire joli
-        progress.setrange(progressBar, 0, length(groupAFixtures))
-        progressBarIndex = 0
+        local groupBPatch = {} -- creation du talbeau patch groupe B
+        for key, value in pairs(groupBFixtures) do
+            groupBPatch[length(groupBPatch) + 1] = getPatchOfFixture(value)
+        end
 
-        for key, value in pairs(groupBFixtures) do -- Patch du groupe B
-            if inList(patchedList, value) then -- Test si fixture pas deja patchee
-                feedback("Fixture " .. value .. " deja patchee")
+        -- Affichage d'un recap global du swap
+        gma.feedback("--------------------------------------------------------------------------------------")
+        for key, value in pairs(groupAFixtures) do
+            if inList(groupBFixtures, value) then
+                gma.feedback("Fixture ID " .. value .. " patch " .. groupAPatch[key] ..
+                                 " <------- TAKE PATCH OF -------< Fixture ID " .. groupBFixtures[key] .. " patch " ..
+                                 groupBPatch[key])
             else
-                patchFixture(value, groupAPatch[key])
-                patchedList[length(patchedList) + 1] = value -- Ajout de la fixture a la liste des deja patchee
+                gma.feedback("Fixture ID " .. value .. " patch " .. groupAPatch[key] ..
+                                 " <------- SWAP PATCH -------> Fixture ID " .. groupBFixtures[key] .. " patch " ..
+                                 groupBPatch[key])
             end
-
-            progressBarIndex = progressBarIndex + 1
-            progress.set(progressBar, progressBarIndex)
-            progress.settext(progressBar, "Fixture " .. value)
-            sleep()
         end
-        progress.stop(progressBar)
+        gma.feedback("--------------------------------------------------------------------------------------")
 
+        if confirm("CrossPatchByGroup",
+            "Confirmez le cross patch entre le groupe " .. groupAIndex .. " et le groupe " .. groupBIndex .. " ?") then -- demande confirmation
+            local patchedList = {} -- Liste des deja patchee
+
+            local progressBar = progress.start("Patch group A") -- Affichage progress bar pour faire joli
+            progress.setrange(progressBar, 0, length(groupAFixtures))
+            local progressBarIndex = 0
+
+            for key, value in pairs(groupAFixtures) do -- Patch du groupe A
+                patchFixture(value, groupBPatch[key])
+                patchedList[length(patchedList) + 1] = value -- Ajout de la fixture a la liste des deja patchee
+
+                progressBarIndex = progressBarIndex + 1
+                progress.set(progressBar, progressBarIndex)
+                progress.settext(progressBar, "Fixture " .. value)
+                sleep()
+            end
+            progress.stop(progressBar)
+
+            progressBar = progress.start("Patch group A") -- Affichage progress bar pour faire joli
+            progress.setrange(progressBar, 0, length(groupAFixtures))
+            progressBarIndex = 0
+
+            for key, value in pairs(groupBFixtures) do -- Patch du groupe B
+                if inList(patchedList, value) then -- Test si fixture pas deja patchee
+                    feedback("Fixture " .. value .. " deja patchee")
+                else
+                    patchFixture(value, groupAPatch[key])
+                    patchedList[length(patchedList) + 1] = value -- Ajout de la fixture a la liste des deja patchee
+                end
+
+                progressBarIndex = progressBarIndex + 1
+                progress.set(progressBar, progressBarIndex)
+                progress.settext(progressBar, "Fixture " .. value)
+                sleep()
+            end
+            progress.stop(progressBar)
+            feedback("Cross Patch effectué")
+        else
+            feedback("Cross patch annule")
+        end
+        blindEdit(false)
+    elseif tonumber(getvar("selectedfixturescount")) == 2 then -- si 2 fixture selectionnees
+        cmd('Store Group ' .. tempGroup .. ' /o') -- on store dans un group temporaire pour recuperer l'id des machines
+        cmd('SelFix Group ' .. tempGroup .. '')
+        blindEdit(true)
+        local fixture = findFixtureInGroup(tempGroup) -- on recupere les id
+
+        gma.feedback("--------------------------------------------------------------------------------------")
+        gma.feedback("Fixture ID " .. fixture[1] .. " patch " .. getPatchOfFixture(fixture[1]) ..
+                         " <------- SWAP PATCH -------> Fixture ID " .. fixture[2] .. " patch " ..
+                         getPatchOfFixture(fixture[2])) -- affichage
+        gma.feedback("--------------------------------------------------------------------------------------")
+
+        if confirm('CrossPatchByGroup', 'Voulez-vous inverser le patch entre la fixture ' .. fixture[1] ..
+            ' et la fixture ' .. fixture[2] .. ' ?') then
+            local patchFixture0 = getPatchOfFixture(fixture[1]) -- on met de cote le patch de la fixture 1
+            patchFixture(fixture[1], getPatchOfFixture(fixture[2])) -- on patch la fixture 1 avec l'adresse de la fixture 2
+            patchFixture(fixture[2], patchFixture0) -- et on patch la fixture 2 avec l'adresse de la fixt 1 avec l'adresse mise de cote
+        else
+            feedback("Cross patch annule")
+        end
+        blindEdit(false)
+        feedback("Cross Patch effectué")
     else
-        feedback("Cross patch annule")
+        error("Nombre de fixture selectionnées n'est pas égal a deux.")
     end
+
 end
 
 return start
